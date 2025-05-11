@@ -1,0 +1,95 @@
+{% extends "base.html.j2" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block head %}
+<title>新界區咪錶泊車位</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+{% endblock %}
+{% block app_content %}
+    <div class="container mt-4">
+        <h1 class="mb-4 text-center">新界區咪錶泊車位</h1>
+        <div class="form-group d-flex justify-content-between">
+            <div style="width: 33%;">
+                <label for="timeCategory">收費時間類別</label>
+                <select id="timeCategory" class="form-control" onchange="filterTable()">
+                    <option value="all">全部</option>
+                    <option disabled>-------------------------------------</option>
+                    <option value="S">星期六; 上午 8 時至午夜 12 時</option>
+                    <option value="SQD">星期日; 上午 10 時至晚上 10 時</option>
+                    <option disabled>-------------------------------------</option>
+                    <option value="S">星期一至五; 下午 5 時至午夜 12 時</option>
+                    <option disabled>-------------------------------------</option>
+                    <option value="QBP">星期一至六; 上午 8 時至晚上 8 時</option>
+                    <option value="AD">星期一至六; 上午 8 時至午夜 12 時</option>
+                    <option disabled>-------------------------------------</option>
+                    <option value="H">星期一至日; 上午 8 時至晚上 8 時</option>
+                    <option value="F">星期一至日; 上午 8 時至晚上 9 時</option>
+                    <option value="J">星期一至日; 上午 8 時至午夜 12 時</option>
+                    <option value="N">星期一至日; 晚上 7 時至午夜 12 時</option>
+                </select>
+            </div>
+            <div style="width: 33%;">
+                <label for="districtCategory">地區</label>
+                <select id="districtCategory" class="form-control" onchange="filterTable()">
+                    <option value="all">全部</option>
+                    {% set district_categories = parking_spaces | map(attribute='地區') | unique %}
+                    {% for district in district_categories %}
+                        <option value="{{ district }}">{{ district }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        {% for column in parking_spaces[0].keys() %}
+                            {% if column != '收費時間類別' %}
+                                <th>{{ column }}</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody id="parkingTable">
+                    {% for space in parking_spaces %}
+                        {% if space['供中型及重型貨車、巴士、電單車及單車以外車輛停泊'] != 0 or space['供貨車停泊'] != 0 or space['供巴士停泊'] != 0 %}
+                            <tr class="parking-row" data-category="{{ space['收費時間類別'] }}" data-district="{{ space['地區'] }}">
+                                {% for key, value in space.items() %}
+                                    {% if key != '收費時間類別' %}
+                                        <td>{{ value }}</td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function filterTable() {
+            var timeCategory = document.getElementById('timeCategory').value;
+            var districtCategory = document.getElementById('districtCategory').value;
+            var rows = document.querySelectorAll('.parking-row');
+            rows.forEach(function(row) {
+                var rowCategory = row.getAttribute('data-category');
+                var rowDistrict = row.getAttribute('data-district');
+                var timeMatch = (timeCategory === 'all' || rowCategory === timeCategory || 
+                    (timeCategory === 'AD' && (rowCategory === 'A' || rowCategory === 'D')) ||
+                    (timeCategory === 'QBP' && (rowCategory === 'Q' || rowCategory === 'B' || rowCategory === 'P')) ||
+                    (timeCategory === 'N' && rowCategory === 'N') ||
+                    (timeCategory === 'F' && rowCategory === 'F') ||
+                    (timeCategory === 'H' && rowCategory === 'H') ||
+                    (timeCategory === 'J' && rowCategory === 'J') ||
+                    (timeCategory === 'S' && rowCategory === 'S') ||
+                    (timeCategory === 'SQD' && (rowCategory === 'S' || rowCategory === 'Q' || rowCategory === 'D')));
+                var districtMatch = (districtCategory === 'all' || rowDistrict === districtCategory);
+                if (timeMatch && districtMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+{% endblock %}

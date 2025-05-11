@@ -1,0 +1,747 @@
+{% extends "base.html.j2" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block head %}
+<title>Traffic Camera Locations</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<style>
+    /* Dark mode styles specific to camera page */
+    body.dark-mode .img-thumbnail {
+        background-color: #2a2a2a;
+        border-color: #444;
+    }
+    
+    body.dark-mode .modal-content {
+        background-color: #1e1e1e;
+        border-color: #444;
+    }
+    
+    body.dark-mode .modal-header {
+        border-color: #444;
+    }
+    
+    body.dark-mode .modal-body {
+        color: #e0e0e0;
+    }
+    
+    body.dark-mode .modal-body img {
+        border: 1px solid #444;
+    }
+    
+    body.dark-mode .modal-body p {
+        color: #e0e0e0;
+    }
+    
+    body.dark-mode .modal-body strong {
+        color: #e0e0e0;
+    }
+    
+    body.dark-mode .chatbox-btn {
+        background-color: #375a72;
+    }
+    
+    body.dark-mode .chatbox-btn:hover {
+        background-color: #446b86;
+    }
+    
+    body.dark-mode .chatbox-popup {
+        background-color: #1e1e1e;
+        border-color: #444;
+    }
+    
+    body.dark-mode .chatbox-header {
+        background-color: #375a72;
+        border-color: #2e4b60;
+    }
+    
+    /* Fix for favorite state in dark mode */
+    body.dark-mode tr.favorite {
+        background-color: rgba(55, 90, 114, 0.2) !important;
+    }
+    
+    /* Fix the camera modals in dark mode */
+    body.dark-mode .close {
+        color: #e0e0e0;
+    }
+    
+    /* Fix table hover styles in dark mode */
+    body.dark-mode .table-hover > tbody > tr:hover {
+        background-color: #375a72 !important;
+        color: white !important;
+    }
+
+    /* Dark mode styles for form controls */
+    body.dark-mode select.form-control,
+    body.dark-mode input.form-control {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #444;
+    }
+
+    body.dark-mode select.form-control option {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+    }
+
+    body.dark-mode input.form-control::placeholder {
+        color: #aaa;
+    }
+
+    /* Ensure dropdown arrows are visible in dark mode */
+    body.dark-mode select.form-control::-ms-expand {
+        color: #e0e0e0;
+    }
+
+    /* Dark mode styles for modals */
+    body.dark-mode .modal-content {
+        background-color: #1e1e1e;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .modal-header {
+        border-color: #444;
+    }
+
+    body.dark-mode .modal-body {
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .modal-header .close {
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .modal-body img {
+        border: 1px solid #444;
+    }
+
+    /* Dark mode styles for table rows and cells */
+    body.dark-mode .table {
+        background-color: transparent;
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    body.dark-mode .table-hover > tbody > tr:hover {
+        background-color: rgba(55, 90, 114, 0.2);
+        color: #ffffff;
+    }
+
+    body.dark-mode .table > tbody > tr > td {
+        border-color: #444;
+    }
+
+    body.dark-mode .table > thead > tr > th {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #444;
+    }
+
+    body.dark-mode .table > tbody > tr.favorite {
+        background-color: rgba(55, 90, 114, 0.2) !important;
+    }
+</style>
+{% endblock %}
+{% block app_content %}
+    <h1 class="text-center mb-4">Traffic Camera Locations</h1>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Favorites</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Region</th>
+                                <th>District</th>
+                                <th>Description</th>
+                                <th>Image</th>
+                                <th>Location</th>
+                                <th>Favorite</th>
+                            </tr>
+                        </thead>
+                        <tbody id="favoritesTableBody">
+                            <!-- Favorite cameras will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="districtSelect">Select District:</label>
+                    <select id="districtSelect" class="form-control">
+                        <option value="">-- Select District --</option>
+                        <option value="Central and Western">Central and Western</option>
+                        <option value="Eastern">Eastern</option>
+                        <option value="Southern">Southern</option>
+                        <option value="Wan Chai">Wan Chai</option>
+                        <option value="Islands">Islands</option>
+                        <option value="Kwai Tsing">Kwai Tsing</option>
+                        <option value="North">North</option>
+                        <option value="Sai Kung">Sai Kung</option>
+                        <option value="Sha Tin">Sha Tin</option>
+                        <option value="Tai Po">Tai Po</option>
+                        <option value="Tsuen Wan">Tsuen Wan</option>
+                        <option value="Tuen Mun">Tuen Mun</option>
+                        <option value="Yuen Long">Yuen Long</option>
+                        <option value="Kowloon City">Kowloon City</option>
+                        <option value="Kwun Tong">Kwun Tong</option>
+                        <option value="Sham Shui Po">Sham Shui Po</option>
+                        <option value="Wong Tai Sin">Wong Tai Sin</option>
+                        <option value="Yau Tsim Mong">Yau Tsim Mong</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="descriptionSearch">Search Description:</label>
+                    <input type="text" id="descriptionSearch" class="form-control" placeholder="Search by description">
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Region</th>
+                                <th>District</th>
+                                <th>Description</th>
+                                <th>Image</th>
+                                <th>Location</th>
+                                <th>Favorite</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cameraTableBody">
+                            {% for camera in cameras %}
+                                <tr data-district="{{ camera.district }}" data-camera-id="{{ camera.id }}">
+                                    <td>{{ camera.region }}</td>
+                                    <td>{{ camera.district }}</td>
+                                    <td>{{ camera.description }}</td>
+                                    <td>
+                                        <img src="{{ camera.url }}" alt="{{ camera.description }}" class="img-thumbnail" width="200" data-toggle="modal" data-target="#cameraModal{{ loop.index }}">
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary" onclick="showMap('{{ camera.latitude }}', '{{ camera.longitude }}', '{{ camera.description }}')">View Map</button>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-warning favorite-btn" onclick="toggleFavorite(this)">Favorite</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% for camera in cameras %}
+    <div class="modal fade" id="cameraModal{{ loop.index }}" tabindex="-1" role="dialog" aria-labelledby="cameraModalLabel{{ loop.index }}" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cameraModalLabel{{ loop.index }}">{{ camera.description }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img src="{{ camera.url }}" alt="{{ camera.description }}" class="img-fluid">
+                    <p><strong>Region:</strong> {{ camera.region }}</p>
+                    <p><strong>District:</strong> {{ camera.district }}</p>
+                    <p><strong>Description:</strong> {{ camera.description }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+<!-- Map Modal -->
+<div id="map-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mapModalLabel">Image</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe id="map" width="100%" height="400px" frameborder="0" style="border:0" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('districtSelect').addEventListener('change', function() {
+        var selectedDistrict = this.value;
+        filterByDistrict(selectedDistrict);
+    });
+
+    document.getElementById('descriptionSearch').addEventListener('input', function() {
+        var searchText = this.value.toLowerCase();
+        filterByDescription(searchText);
+    });
+
+    function filterByDistrict(district) {
+        var rows = document.querySelectorAll('#cameraTableBody tr');
+        rows.forEach(function(row) {
+            if (district === "" || row.getAttribute('data-district') === district) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function filterByDescription(searchText) {
+        var rows = document.querySelectorAll('#cameraTableBody tr');
+        rows.forEach(function(row) {
+            var description = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+            if (description.includes(searchText)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function showMap(lat, long, description) {
+        const mapFrame = document.getElementById('map');
+        mapFrame.src = `https://www.google.com/maps?q=${lat},${long}&output=embed`;
+        document.getElementById('mapModalLabel').textContent = `Image - ${description}`;
+        
+        // Check if we're in dark mode and apply styling before showing modal
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        if (isDarkMode) {
+            const modalContent = document.querySelector('#map-modal .modal-content');
+            if (modalContent) {
+                modalContent.style.backgroundColor = '#1e1e1e';
+                modalContent.style.borderColor = '#444';
+                modalContent.style.color = '#e0e0e0';
+            }
+            
+            const modalHeader = document.querySelector('#map-modal .modal-header');
+            if (modalHeader) {
+                modalHeader.style.borderColor = '#444';
+            }
+            
+            const modalTitle = document.querySelector('#map-modal .modal-title');
+            if (modalTitle) {
+                modalTitle.style.color = '#e0e0e0';
+            }
+            
+            const closeButton = document.querySelector('#map-modal .close');
+            if (closeButton) {
+                closeButton.style.color = '#e0e0e0';
+            }
+        }
+        
+        $('#map-modal').modal('show');
+    }
+
+    function toggleFavorite(button) {
+        const row = button.closest('tr');
+        const cameraId = row.getAttribute('data-camera-id');
+        if (row.classList.contains('favorite')) {
+            row.classList.remove('favorite');
+            button.textContent = 'Favorite';
+            removeFavorite(cameraId);
+            document.getElementById('cameraTableBody').appendChild(row);
+        } else {
+            row.classList.add('favorite');
+            button.textContent = 'Unfavorite';
+            addFavorite(cameraId);
+            document.getElementById('favoritesTableBody').appendChild(row);
+        }
+    }
+
+    function addFavorite(cameraId) {
+        let favorites = JSON.parse(sessionStorage.getItem('favorites')) || [];
+        if (!favorites.includes(cameraId)) {
+            favorites.push(cameraId);
+            sessionStorage.setItem('favorites', JSON.stringify(favorites));
+        }
+    }
+
+    function removeFavorite(cameraId) {
+        let favorites = JSON.parse(sessionStorage.getItem('favorites')) || [];
+        favorites = favorites.filter(id => id !== cameraId);
+        sessionStorage.setItem('favorites', JSON.stringify(favorites));
+    }
+
+    function loadFavorites() {
+        let favorites = JSON.parse(sessionStorage.getItem('favorites')) || [];
+        favorites.forEach(cameraId => {
+            const row = document.querySelector(`tr[data-camera-id="${cameraId}"]`);
+            if (row) {
+                row.classList.add('favorite');
+                const button = row.querySelector('.favorite-btn');
+                button.textContent = 'Unfavorite';
+                document.getElementById('favoritesTableBody').appendChild(row);
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadFavorites);
+    
+    // Add dark mode detection and application
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if dark mode is enabled
+        const isDarkMode = document.body.classList.contains('dark-mode') || 
+                           localStorage.getItem('darkMode') === 'enabled';
+        
+        if (isDarkMode) {
+            applyCameraPageDarkMode(true);
+        }
+        
+        // Set up observer to detect theme changes from other components
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'class' && 
+                    mutation.target === document.body) {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    applyCameraPageDarkMode(isDarkMode);
+                }
+            });
+        });
+        
+        observer.observe(document.body, { attributes: true });
+        
+        // Find theme toggle button and enhance it to update camera page elements
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            const originalClickHandler = themeToggle.onclick;
+            themeToggle.onclick = function(e) {
+                if (originalClickHandler) {
+                    originalClickHandler.call(this, e);
+                }
+                // Apply camera-specific updates after a small delay
+                setTimeout(function() {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    applyCameraPageDarkMode(isDarkMode);
+                }, 50);
+            };
+        }
+    });
+    
+    function applyCameraPageDarkMode(isDarkMode) {
+        // Update camera thumbnails
+        const thumbnails = document.querySelectorAll('.img-thumbnail');
+        thumbnails.forEach(img => {
+            if (isDarkMode) {
+                img.style.backgroundColor = '#2a2a2a';
+                img.style.borderColor = '#444';
+            } else {
+                img.style.backgroundColor = '';
+                img.style.borderColor = '';
+            }
+        });
+        
+        // Update modals
+        const modalContents = document.querySelectorAll('.modal-content');
+        modalContents.forEach(modal => {
+            if (isDarkMode) {
+                modal.style.backgroundColor = '#1e1e1e';
+                modal.style.borderColor = '#444';
+                modal.style.color = '#e0e0e0';
+            } else {
+                modal.style.backgroundColor = '';
+                modal.style.borderColor = '';
+                modal.style.color = '';
+            }
+        });
+        
+        // Update modal headers
+        const modalHeaders = document.querySelectorAll('.modal-header');
+        modalHeaders.forEach(header => {
+            if (isDarkMode) {
+                header.style.borderColor = '#444';
+            } else {
+                header.style.borderColor = '';
+            }
+        });
+        
+        // Update modal bodies
+        const modalBodies = document.querySelectorAll('.modal-body');
+        modalBodies.forEach(body => {
+            if (isDarkMode) {
+                body.style.color = '#e0e0e0';
+            } else {
+                body.style.color = '';
+            }
+        });
+        
+        // Update chatbox button
+        const chatboxBtn = document.querySelector('.chatbox-btn');
+        if (chatboxBtn) {
+            if (isDarkMode) {
+                chatboxBtn.style.backgroundColor = '#375a72';
+            } else {
+                chatboxBtn.style.backgroundColor = '#007bff';
+            }
+        }
+        
+        // Update chatbox popup
+        const chatboxPopup = document.getElementById('chatbox-popup');
+        if (chatboxPopup) {
+            if (isDarkMode) {
+                chatboxPopup.style.backgroundColor = '#1e1e1e';
+                chatboxPopup.style.borderColor = '#444';
+            } else {
+                chatboxPopup.style.backgroundColor = '';
+                chatboxPopup.style.borderColor = '';
+            }
+        }
+        
+        // Update chatbox header
+        const chatboxHeader = document.querySelector('.chatbox-header');
+        if (chatboxHeader) {
+            if (isDarkMode) {
+                chatboxHeader.style.backgroundColor = '#375a72';
+                chatboxHeader.style.borderColor = '#2e4b60';
+            } else {
+                chatboxHeader.style.backgroundColor = '#007bff';
+                chatboxHeader.style.borderColor = '';
+            }
+        }
+        
+        // Update tables
+        const tables = document.querySelectorAll('.table');
+        tables.forEach(table => {
+            if (isDarkMode) {
+                table.classList.add('dark-mode-table');
+            } else {
+                table.classList.remove('dark-mode-table');
+            }
+        });
+        
+        // Update favorite state styling
+        const favoriteRows = document.querySelectorAll('tr.favorite');
+        favoriteRows.forEach(row => {
+            if (isDarkMode) {
+                row.style.backgroundColor = 'rgba(55, 90, 114, 0.2)';
+            } else {
+                row.style.backgroundColor = '';
+            }
+        });
+
+        // Update form controls
+        const formControls = document.querySelectorAll('select.form-control, input.form-control');
+        formControls.forEach(element => {
+            if (isDarkMode) {
+                element.style.backgroundColor = '#2a2a2a';
+                element.style.color = '#e0e0e0';
+                element.style.borderColor = '#444';
+            } else {
+                element.style.backgroundColor = '';
+                element.style.color = '';
+                element.style.borderColor = '';
+            }
+        });
+    }
+
+    function toggleChatbox() {
+        const chatboxPopup = document.getElementById('chatbox-popup');
+        const isVisible = chatboxPopup.style.display !== 'none';
+        chatboxPopup.style.display = isVisible ? 'none' : 'block';
+        
+        // Apply dark mode to chatbox when it's opened
+        if (!isVisible) {
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            if (isDarkMode) {
+                chatboxPopup.style.backgroundColor = '#1e1e1e';
+                chatboxPopup.style.borderColor = '#444';
+                
+                const chatboxHeader = document.querySelector('.chatbox-header');
+                if (chatboxHeader) {
+                    chatboxHeader.style.backgroundColor = '#375a72';
+                    chatboxHeader.style.borderColor = '#2e4b60';
+                }
+            }
+        }
+    }
+
+    function applyModalDarkMode(isDarkMode) {
+        const modals = document.querySelectorAll('.modal-content');
+        modals.forEach(modal => {
+            if (isDarkMode) {
+                modal.style.backgroundColor = '#1e1e1e';
+                modal.style.borderColor = '#444';
+                modal.style.color = '#e0e0e0';
+            } else {
+                modal.style.backgroundColor = '';
+                modal.style.borderColor = '';
+                modal.style.color = '';
+            }
+        });
+
+        const modalHeaders = document.querySelectorAll('.modal-header');
+        modalHeaders.forEach(header => {
+            if (isDarkMode) {
+                header.style.borderColor = '#444';
+            } else {
+                header.style.borderColor = '';
+            }
+        });
+
+        const modalBodies = document.querySelectorAll('.modal-body');
+        modalBodies.forEach(body => {
+            if (isDarkMode) {
+                body.style.color = '#e0e0e0';
+            } else {
+                body.style.color = '';
+            }
+        });
+
+        const closeButtons = document.querySelectorAll('.modal-header .close');
+        closeButtons.forEach(button => {
+            if (isDarkMode) {
+                button.style.color = '#e0e0e0';
+            } else {
+                button.style.color = '';
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        applyModalDarkMode(isDarkMode);
+
+        // Observe changes to the body class for theme toggling
+        const observer = new MutationObserver(() => {
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            applyModalDarkMode(isDarkMode);
+        });
+
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    });
+
+    function applyTableDarkMode(isDarkMode) {
+        const tableRows = document.querySelectorAll('#cameraTableBody tr');
+        tableRows.forEach(row => {
+            if (isDarkMode) {
+                row.style.backgroundColor = row.classList.contains('favorite') 
+                    ? 'rgba(55, 90, 114, 0.2)' 
+                    : '';
+                row.style.color = '#e0e0e0';
+            } else {
+                row.style.backgroundColor = '';
+                row.style.color = '';
+            }
+        });
+
+        const tableHeaders = document.querySelectorAll('.table thead th');
+        tableHeaders.forEach(header => {
+            if (isDarkMode) {
+                header.style.backgroundColor = '#2a2a2a';
+                header.style.color = '#e0e0e0';
+                header.style.borderColor = '#444';
+            } else {
+                header.style.backgroundColor = '';
+                header.style.color = '';
+                header.style.borderColor = '';
+            }
+        });
+    }
+
+    // Call this function when dark mode is toggled
+    document.addEventListener('DOMContentLoaded', function() {
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        applyTableDarkMode(isDarkMode);
+
+        const observer = new MutationObserver(() => {
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            applyTableDarkMode(isDarkMode);
+        });
+
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    });
+</script>
+ <!-- Chatbox Button -->
+<div id="chatbox-button" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+    <button class="chatbox-btn" onclick="toggleChatbox()" aria-label="Chat with AI">
+        <span class="chatbox-icon">&#128172;</span> <!-- Speech bubble emoji as an icon -->
+    </button>
+</div>
+
+<!-- Chatbox Popup -->
+<div id="chatbox-popup" class="chatbox-popup">
+    <div class="chatbox-header">
+        <h5 class="mb-0">AI Chatbox Room</h5>
+        <button class="btn btn-sm btn-danger" onclick="toggleChatbox()">Close</button>
+    </div>
+    <iframe src="{{ url_for('ai_chatbox') }}" width="100%" height="100%" frameborder="0"></iframe>
+</div>
+
+<style>
+    /* Floating Action Button (FAB) Style for Chatbox Button */
+    .chatbox-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .chatbox-btn:hover {
+        background-color: #0056b3;
+        transform: scale(1.1);
+    }
+
+    .chatbox-btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.5);
+    }
+
+    .chatbox-icon {
+        font-size: 1.5rem;
+        line-height: 1;
+    }
+
+    /* Chatbox Popup */
+    .chatbox-popup {
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        width: 300px;
+        height: 800px;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .chatbox-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background: #007bff;
+        color: white;
+        border-bottom: 1px solid #ccc;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    .chatbox-header h5 {
+        margin: 0;
+    }
+</style>
+
+<script>
+    function toggleChatbox() {
+        const chatboxPopup = document.getElementById('chatbox-popup');
+        chatboxPopup.style.display = chatboxPopup.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
+{% endblock %}

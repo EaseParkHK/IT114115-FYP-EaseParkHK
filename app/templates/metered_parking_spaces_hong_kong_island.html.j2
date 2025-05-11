@@ -1,0 +1,97 @@
+{% extends "base.html.j2" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block head %}
+<title>Metered Parking Spaces in Hong Kong Island Region</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+{% endblock %}
+{% block app_content %}
+    <div class="container mt-4">
+        <h1 class="mb-4 text-center">Metered Parking Spaces in Hong Kong Island Region</h1>
+        <div class="form-group d-flex justify-content-between">
+            <div style="width: 33%;">
+                <label for="timeCategory">Types of Operating Hours</label>
+                <select id="timeCategory" class="form-control" onchange="filterTable()">
+                    <option value="all">All</option>
+                    <option disabled>-------------------------------------</option>
+                    <option value="S">Saturday; 8 AM to 12 AM</option>
+                    <option value="SQD">Sunday; 10 AM to 10 PM</option>
+                    <option disabled>-------------------------------------</option>
+                    <option value="S">Monday to Friday; 5 PM to 12 AM</option>
+                    <option disabled>-------------------------------------</option>
+                    <option value="AD">Monday to Saturday; 8 AM to 12 AM</option>
+                    <option value="QBP">Monday to Saturday; 8 AM to 8 PM</option>
+                    <option disabled>-------------------------------------</option>
+                    <option value="N">Monday to Sunday; 7 PM to 12 AM</option>
+                    <option value="F">Monday to Sunday; 8 AM to 9 PM</option>
+                    <option value="H">Monday to Sunday; 8 AM to 8 PM</option>
+                    <option value="J">Monday to Sunday; 8 AM to 12 AM</option>
+                </select>
+            </div>
+            <div style="width: 33%;">
+                <label for="districtCategory">District</label>
+                <select id="districtCategory" class="form-control" onchange="filterTable()">
+                    <option value="all">All</option>
+                    {% set district_categories = parking_spaces | map(attribute='District') | unique %}
+                    {% for district in district_categories %}
+                        <option value="{{ district }}">{{ district }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        {% for column in parking_spaces[0].keys() %}
+                            {% if column != 'Types of Operating Hours' %}
+                                <th>{{ column }}</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody id="parkingTable">
+                    {% for space in parking_spaces %}
+                        {% if not (space['For Vehicles Other Than Medium and Heavy Goods Vehicles, Buses, Motor Cycles and Pedal Cycles'] == 0 
+                                   and space['For Goods Vehicles'] == 0 
+                                   and space['For Coaches'] == 0) %}
+                            <tr class="parking-row" data-category="{{ space['Types of Operating Hours'] }}" data-district="{{ space['District'] }}">
+                                {% for key, value in space.items() %}
+                                    {% if key != 'Types of Operating Hours' %}
+                                        <td>{{ value }}</td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function filterTable() {
+            var timeCategory = document.getElementById('timeCategory').value;
+            var districtCategory = document.getElementById('districtCategory').value;
+            var rows = document.querySelectorAll('.parking-row');
+            rows.forEach(function(row) {
+                var rowCategory = row.getAttribute('data-category');
+                var rowDistrict = row.getAttribute('data-district');
+                var timeMatch = (timeCategory === 'all' || 
+                    (timeCategory === 'AD' && (rowCategory === 'A' || rowCategory === 'D')) ||
+                    (timeCategory === 'QBP' && (rowCategory === 'Q' || rowCategory === 'B' || rowCategory === 'P')) ||
+                    (timeCategory === 'N' && rowCategory === 'N') ||
+                    (timeCategory === 'F' && rowCategory === 'F') ||
+                    (timeCategory === 'H' && rowCategory === 'H') ||
+                    (timeCategory === 'J' && rowCategory === 'J') ||
+                    (timeCategory === 'S' && rowCategory === 'S') ||
+                    (timeCategory === 'SQD' && (rowCategory === 'S' || rowCategory === 'Q' || rowCategory === 'D')));
+                var districtMatch = (districtCategory === 'all' || rowDistrict === districtCategory);
+                if (timeMatch && districtMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+{% endblock %}
