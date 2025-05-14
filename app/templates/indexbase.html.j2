@@ -7,7 +7,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <style>
-    /* Dropdown submenu styling */
     .dropdown-submenu {
       position: relative;
     }
@@ -143,22 +142,22 @@
                     <a tabindex="-1" href="/carparkinfo/Tsuen%20Wan">Tsuen Wan District</a>
                   </li>
                   <li>
-                    <a tabindex="-1" href="/carparkinfo/Yuen Long">Yuen Long District</a>
+                    <a tabindex="-1" href="/carparkinfo/Yuen%20Long">Yuen Long District</a>
                   </li>
                   <li>
-                    <a tabindex="-1" href="/carparkinfo/Tuen Mun">Tuen Mun District</a>
+                    <a tabindex="-1" href="/carparkinfo/Tuen%20Mun">Tuen Mun District</a>
                   </li>
                   <li>
                     <a tabindex="-1" href="/carparkinfo/North">North District</a>
                   </li>
                   <li>
-                    <a tabindex="-1" href="/carparkinfo/Tai Po">Tai Po District</a>
+                    <a tabindex="-1" href="/carparkinfo/Tai%20Po">Tai Po District</a>
                   </li>
                   <li>
-                    <a tabindex="-1" href="/carparkinfo/Sha Tin">Sha Tin District</a>
+                    <a tabindex="-1" href="/carparkinfo/Sha%20Tin">Sha Tin District</a>
                   </li>
                   <li>
-                    <a tabindex="-1" href="/carparkinfo/Sai Kung">Sai Kung District</a>
+                    <a tabindex="-1" href="/carparkinfo/Sai%20Kung">Sai Kung District</a>
                   </li>
                   <li>
                     <a tabindex="-1" href="/carparkinfo/Islands">Islands District</a>
@@ -172,13 +171,13 @@
               <span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li>
-                <a tabindex="-1" href="/metered_parking_spaces_hong_kong_island">Hong Kong Island Region</a>
+                <a tabindex="-1" href="/metered_parking_spaces_hong_kong_island">Hong Kong Island</a>
               </li>
               <li>
                 <a tabindex="-1" href="/metered_parking_spaces_kowloon">Kowloon Region</a>
               </li>
               <li>
-                <a tabindex="-1" href="/metered_parking_spaces_new_territories">New Territories Region</a>
+                <a tabindex="-1" href="/metered_parking_spaces_new_territories">New Territories</a>
               </li>
             </ul>
           </li>
@@ -201,72 +200,58 @@
               {% endif %}
             </li>
             <li>
-              <a href="{{ url_for('login') }}">{{ _('Login') }}</a>
+              <a href="#" id="dark-mode-toggle">
+                <span class="glyphicon glyphicon-adjust"></span>
+              </a>
             </li>
-            <li>
-              <a href="/settings">{{ _('Settings') }}</a>
-            </li>
-            <li class="theme-toggle-wrapper">
-              <button id="theme-toggle" class="btn">
-                <i class="glyphicon glyphicon-adjust night-mode-icon"></i>
-              </button>
-            </li>
-          {% else %}
-            <li class="language-box">
-              {% if request.path.startswith('/zh/') %}
-                <a href="{{ request.path[3:] }}">{{ _('English') }}</a>
-              {% elif request.path == '/zh' %}
-                <a href="/">{{ _('EN') }}</a>
-              {% else %}
-                <a href="{{ '/zh' + request.path if request.path != '/' else '/zh' }}">{{ _('繁') }}</a>
-              {% endif %}
-            </li>
-            <li>
-              <a href="{{ url_for('user', username=current_user.username) }}">{{ _('Profile') }}</a>
-            </li>
-            <li>
-              <a href="/settings">{{ _('Settings') }}</a>
-            </li>
-            <li>
-              <a href="{{ url_for('logout') }}">{{ _('Logout') }}</a>
-            </li>
-            <li class="theme-toggle-wrapper">
-              <button id="theme-toggle" class="btn">
-                <i class="glyphicon glyphicon-adjust night-mode-icon"></i>
-              </button>
-            </li>
-          {% endif %}
-        </ul>
-      </div>
-    </nav>
-  
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-        const icon = themeToggle.querySelector('i');
+            {% else %}
+              <li class="language-box">
+                {% if request.path.startswith('/zh/') %}
+                  <a href="{{ request.path[3:] }}">{{ _('English') }}</a>
+                {% elif request.path == '/zh' %}
+                  <a href="/">{{ _('EN') }}</a>
+                {% else %}
+                  <a href="{{ '/zh' + request.path if request.path != '/' else '/zh' }}">{{ _('繁') }}</a>
+                {% endif %}
+              </li>
+              <li>
+                <a href="{{ url_for('user', username=current_user.username) }}">{{ _('個人資料') }}</a>
+              </li>
+              <li>
+                <a href="/settings">{{ _('設定') }}</a>
+              </li>
+              <li>
+                <a href="{{ url_for('logout') }}">{{ _('登出') }}</a>
+              </li>
+              <li>
+                <a href="#" id="dark-mode-toggle">
+                  <span class="glyphicon glyphicon-adjust"></span>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>
+    </body>
+  </html>
 
-        // Apply saved theme preference
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            body.classList.add('dark-mode');
-            updateIcon(true);
-        }
+  <script>
 
-        // Toggle dark mode on button click
-        themeToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            const isDarkMode = body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
-            updateIcon(isDarkMode);
-        });
-
-        // Update icon based on mode
-        function updateIcon(isDarkMode) {
-            icon.className = isDarkMode
-                ? 'glyphicon glyphicon-sun night-mode-icon'
-                : 'glyphicon glyphicon-adjust night-mode-icon';
-        }
+      // 根據模式更新圖示
+      function updateIcon(isDarkMode) {
+        icon.className = isDarkMode ? 
+          'glyphicon glyphicon-sun night-mode-icon' : 
+          'glyphicon glyphicon-adjust night-mode-icon';
+      }
+      
+      // 若無儲存的偏好設定，檢查系統偏好
+      if (!localStorage.getItem('darkMode') && 
+          window.matchMedia && 
+          window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        body.classList.add('dark-mode');
+        localStorage.setItem('darkMode', 'enabled');
+        updateIcon(true);
+      }
     });
-    </script>
-  </body>
-</html>
+    
+  </script>

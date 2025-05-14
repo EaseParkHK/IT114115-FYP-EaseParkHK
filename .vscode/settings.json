@@ -32,5 +32,6 @@
         "env.bak{,/**}",
         "venv.bak{,/**}",
         ".vscode{,/**}"
-    ]
+    ],
+    "djlint.showInstallError": false
 }

@@ -384,10 +384,6 @@ def before_request():
         db.session.commit()
     g.locale = str(get_locale())
 
-@app.route('/ai-chatbox')
-def ai_chatbox():
-    return render_template('ai-chatbox.html.j2')
-
 @app.route('/')
 def index():
     response1 = requests.get('https://api.data.gov.hk/v1/carpark-info-vacancy')
