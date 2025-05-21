@@ -11,6 +11,9 @@
 
 **EaseParkHK** is a Flask-based car park vacancy system providing real-time parking availability for car parks across Hong Kong districts. It offers an intuitive interface to help users find available parking, view traffic information, check road conditions, and interact with an AI assistant for parking queries.
 
+**Academic Context**  
+This project is developed as part of the Final Year Project for the [Higher Diploma in Cloud and Data Centre Administration](https://www.vtc.edu.hk/admission/en/programme/it114115-higher-diploma-in-cloud-and-data-centre-administration/) at the Hong Kong Institute of Vocational Education (IVE).
+
 ## Features
 
 - **Real-time car park vacancy updates** for Hong Kong.
@@ -27,7 +30,7 @@
 1. **Clone the repository:**
     ```bash
     git clone https://github.com/easeparkhk/IT114115-FYP-EaseParkHK
-    cd EaseParkHK
+    cd IT114115-FYP-EaseParkHK
     ```
 
 2. **Create and activate a virtual environment:**
@@ -71,6 +74,7 @@
 
 ## Contributors
 
+### Development Team
 - **Henry Lok**  
   [GitHub](https://github.com/HenryLok0) | [LinkedIn](https://www.linkedin.com/in/ihenrylok/)
 
@@ -82,6 +86,10 @@
 
 - **Ben Ho**  
   [GitHub](https://github.com/HoChiWa01) | [LinkedIn](https://www.linkedin.com/in/hochiwa-ben/)
+
+### Project Supervisor
+- **Harry Li**  
+  [GitHub](https://github.com/i45000) | [LinkedIn](https://www.linkedin.com/in/harry-li-61949017a/)
 
 ---
 
