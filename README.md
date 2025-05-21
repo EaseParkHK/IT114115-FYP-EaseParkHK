@@ -26,7 +26,7 @@
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/EaseParkHK/EaseParkHK
+    git clone https://github.com/easeparkhk/IT114115-FYP-EaseParkHK
     cd EaseParkHK
     ```
 
